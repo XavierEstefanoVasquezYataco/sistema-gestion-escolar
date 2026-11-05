@@ -193,9 +193,11 @@
         }
 
         .ui-datatable th {
-            background: #f8fafc !important;
-            color: var(--text-secondary) !important;
-            font-weight: 600 !important;
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            letter-spacing: 0.02em !important;
             padding: 14px 16px !important;
             border-bottom: 1px solid var(--border-color) !important;
         }
@@ -206,7 +208,7 @@
             color: var(--text-primary);
         }
 
-        /* UNIFICACIÓN DE INPUTS Y FOCO ACCESIBLE */
+        /* UNIFICACIÓN DE INPUTS Y FOCO ACCESIBLE (WCAG 2.1 - 2.4.7) */
         .ui-inputfield {
             border-radius: var(--radius-md) !important;
             padding: 8px 12px !important;
@@ -222,12 +224,19 @@
             outline: none !important;
         }
 
+        a:focus-visible, button:focus-visible, .ui-button:focus-visible,
+        .ui-inputfield:focus-visible, .ui-selectonemenu:focus-within {
+            outline: 2px solid var(--primary) !important;
+            outline-offset: 2px !important;
+        }
+
         /* MODALES RESPONSIVOS Y UNIFICADOS */
         .ui-dialog {
             border-radius: var(--radius-lg) !important;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
             border: 1px solid var(--border-color) !important;
             max-width: 95vw !important;
+            max-height: 92vh !important;
         }
 
         .ui-dialog .ui-dialog-titlebar {
@@ -238,16 +247,46 @@
             color: var(--text-primary) !important;
         }
 
+        .ui-dialog .ui-dialog-content {
+            padding: 20px 24px !important;
+            max-height: 72vh !important;
+            overflow-y: auto !important;
+        }
+
         .ui-confirm-dialog {
             max-width: 92vw !important;
         }
 
+        /* UNIFICACIÓN DE MENSAJES Y ALERTAS */
+        .ui-messages, .ui-growl {
+            font-family: var(--font-family) !important;
+        }
+        .ui-messages > div, .ui-growl-item {
+            border-radius: var(--radius-md) !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
         /* BOTONES DE ACCIÓN EN TABLAS */
         .rounded-button.ui-button-flat {
-            width: 2.2rem !important;
-            height: 2.2rem !important;
+            width: 2.4rem !important;
+            height: 2.4rem !important;
+            min-width: 38px !important;
+            min-height: 38px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 1.05rem !important;
             padding: 0 !important;
             margin: 0 3px !important;
+        }
+
+        /* ACCIONES DEL PIE DE MODAL */
+        .modal-footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         /* ESTILOS DE ESTADOS VACÍOS E INDICADOR DE CARGA */
@@ -305,9 +344,11 @@
             }
             .sidebar {
                 width: 100%;
+                max-height: 240px;
+                overflow-y: auto;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                padding: 12px 16px;
+                padding: 10px 14px;
                 box-sizing: border-box;
             }
             .content-wrapper {
@@ -342,6 +383,14 @@
             }
             .formgrid.grid > .field {
                 width: 100% !important;
+            }
+            .modal-footer-actions {
+                flex-direction: column-reverse;
+                gap: 8px;
+            }
+            .modal-footer-actions .ui-button {
+                width: 100% !important;
+                margin: 0 !important;
             }
         }
     </style>
