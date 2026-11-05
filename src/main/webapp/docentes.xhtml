@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Docentes - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo Docente" icon="pi pi-plus" actionListener="#{docenteBean.nuevoDocente}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoDocente').show()"
+                                     styleClass="ui-button-success" style="margin-right: .5rem" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-docentes" widgetVar="dtDocentes" var="doc" value="#{docenteBean.docentes}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{doc.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron docentes registrados."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Gestión de Docentes</div>
+                </f:facet>
+
+                <p:column headerText="DNI" filterBy="#{doc.dni}" width="120">
+                    <h:outputText value="#{doc.dni}" />
+                </p:column>
+
+                <p:column headerText="Apellidos y Nombres" sortBy="#{doc.apellidos}">
+                    <h:outputText value="#{doc.apellidos}, #{doc.nombres}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Usuario del Sistema" width="150">
+                    <h:outputText value="#{doc.usuario eq null ? 'Sin cuenta' : doc.usuario.username}" style="color: #10b981; font-weight: 500;"/>
+                </p:column>
+
+                <p:column headerText="Especialidad" sortBy="#{doc.especialidad}">
+                    <h:outputText value="#{doc.especialidad}" />
+                </p:column>
+
+                <p:column headerText="Teléfono" width="120">
+                    <h:outputText value="#{doc.telefono}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoDocente').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{doc}" target="#{docenteBean.docenteSeleccionado}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarDocenteDialog').show()">
+                        <f:setPropertyActionListener value="#{doc}" target="#{docenteBean.docenteSeleccionado}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle del Docente" showEffect="fade" modal="true" widgetVar="dialogoDocente" responsive="true" style="max-width: 500px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="docente-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="dni" value="DNI" />
+                        <p:inputText id="dni" value="#{docenteBean.docenteSeleccionado.dni}" required="true" requiredMessage="El DNI es obligatorio." maxlength="15" disabled="#{docenteBean.docenteSeleccionado.id ne null}"/>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="nombres" value="Nombres" />
+                        <p:inputText id="nombres" value="#{docenteBean.docenteSeleccionado.nombres}" required="true" requiredMessage="Los nombres son obligatorios."/>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="apellidos" value="Apellidos" />
+                        <p:inputText id="apellidos" value="#{docenteBean.docenteSeleccionado.apellidos}" required="true" requiredMessage="Los apellidos son obligatorios."/>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="email" value="Correo Electrónico" />
+                        <p:inputText id="email" value="#{docenteBean.docenteSeleccionado.email}" />
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="telefono" value="Teléfono" />
+                        <p:inputText id="telefono" value="#{docenteBean.docenteSeleccionado.telefono}" />
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="especialidad" value="Especialidad" />
+                        <p:inputText id="especialidad" value="#{docenteBean.docenteSeleccionado.especialidad}" />
+                    </div>
+                    
+                    <h:panelGroup rendered="#{docenteBean.docenteSeleccionado.id ne null}">
+                        <div class="field" style="margin-bottom: 15px; background-color: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h:outputLabel style="font-weight: bold; color: #475569;" value="Cuenta Institucional Docente: " />
+                            <h:outputText style="font-weight: bold; color: #10b981; margin-left: 5px;" value="#{docenteBean.docenteSeleccionado.usuario.username}" />
+                        </div>
+                    </h:panelGroup>
+                </p:outputPanel>
+                
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{docenteBean.guardarDocente}"
+                                     update="docente-contenido :form:mensajes :form:dt-docentes" process="docente-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoDocente').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarDocenteDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar este docente?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{docenteBean.eliminarDocente}"
+                                 process="@this" oncomplete="PF('eliminarDocenteDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarDocenteDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

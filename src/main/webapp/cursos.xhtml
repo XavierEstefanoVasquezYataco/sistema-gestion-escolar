@@ -1,0 +1,103 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Cursos - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo Curso" icon="pi pi-plus" actionListener="#{cursoBean.nuevoCurso}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoCurso').show()"
+                                     styleClass="ui-button-success" style="margin-right: .5rem" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-cursos" widgetVar="dtCursos" var="curso" value="#{cursoBean.cursos}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{curso.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron cursos registrados."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Gestión de Cursos</div>
+                </f:facet>
+
+                <p:column headerText="ID" width="50" sortBy="#{curso.id}">
+                    <h:outputText value="#{curso.id}" />
+                </p:column>
+
+                <p:column headerText="Nombre del Curso" sortBy="#{curso.nombre}" filterBy="#{curso.nombre}">
+                    <h:outputText value="#{curso.nombre}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Descripción">
+                    <h:outputText value="#{curso.descripcion}" />
+                </p:column>
+
+                <p:column headerText="Grado y Nivel" sortBy="#{curso.grado.nombre}" filterBy="#{curso.grado.nombre}">
+                    <h:outputText value="#{curso.grado.nombre} - #{curso.grado.nivel}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoCurso').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{curso}" target="#{cursoBean.cursoSeleccionado}" />
+                        <f:setPropertyActionListener value="#{curso.grado.id}" target="#{cursoBean.idGradoSeleccionado}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarCursoDialog').show()">
+                        <f:setPropertyActionListener value="#{curso}" target="#{cursoBean.cursoSeleccionado}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle del Curso" showEffect="fade" modal="true" widgetVar="dialogoCurso" responsive="true" style="max-width: 480px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="curso-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="nombre" value="Nombre del Curso" />
+                        <p:inputText id="nombre" value="#{cursoBean.cursoSeleccionado.nombre}" required="true" requiredMessage="El nombre es obligatorio."/>
+                    </div>
+                    
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="descripcion" value="Descripción" />
+                        <p:inputTextarea id="descripcion" value="#{cursoBean.cursoSeleccionado.descripcion}" rows="3" />
+                    </div>
+
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="grado" value="Grado Académico" />
+                        <p:selectOneMenu id="grado" value="#{cursoBean.idGradoSeleccionado}" required="true" requiredMessage="Debe seleccionar un grado.">
+                            <f:selectItem itemLabel="Seleccione un Grado" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{cursoBean.gradosDisponibles}" var="g" itemLabel="#{g.nombre} - #{g.nivel}" itemValue="#{g.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                </p:outputPanel>
+                
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{cursoBean.guardarCurso}"
+                                     update="curso-contenido :form:mensajes :form:dt-cursos" process="curso-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoCurso').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarCursoDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar este curso?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{cursoBean.eliminarCurso}"
+                                 process="@this" oncomplete="PF('eliminarCursoDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarCursoDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

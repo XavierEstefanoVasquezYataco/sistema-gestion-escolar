@@ -1,0 +1,67 @@
+/* ==========================================
+   ESTILOS GENERALES
+========================================== */
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#f4f6f9;
+}
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.header{
+    background:#0d6efd;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+/* ==========================================
+   CONTENIDO
+========================================== */
+
+.contenido{
+    padding:25px;
+    min-height:650px;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.footer{
+    background:#212529;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+
+/* ==========================================
+   TITULOS
+========================================== */
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+/* ==========================================
+   TARJETAS
+========================================== */
+
+.card{
+
+    background:white;
+
+    border-radius:10px;
+
+    padding:20px;
+
+    box-shadow:0px 2px 8px rgba(0,0,0,.2);
+
+    margin-bottom:20px;
+
+}

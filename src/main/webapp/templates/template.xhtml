@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title><ui:insert name="title">Gestión Escolar</ui:insert></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+
+    <style>
+        /* VARIABLES DE DISEÑO MODERNAS */
+        :root {
+            --bg-main: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --border-color: #e2e8f0;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.25);
+        }
+
+        /* RESET GENERAL */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .layout-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* BARRA SUPERIOR PREMIUM (ESTILO SAAS MODERNO) */
+        .topbar {
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            padding: 0 32px;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.025em;
+        }
+        
+        .topbar h2 i {
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-badge {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(79, 70, 229, 0.1);
+        }
+
+        /* ESTRUCTURA PRINCIPAL */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* MENÚ LATERAL LIMPIO */
+        .sidebar {
+            width: 270px;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            z-index: 999;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 36px;
+            overflow-y: auto;
+        }
+
+        /* OVERRIDES DE PRIMEFACES COMPONENTES (Para camuflar el diseño nativo rígido) */
+        .ui-menu {
+            width: 100% !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        .ui-menu .ui-widget-header {
+            background: transparent !important;
+            border: none !important;
+            padding: 16px 12px 8px 12px !important;
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            color: var(--text-muted) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+        }
+
+        .ui-menu .ui-menuitem {
+            margin-bottom: 4px !important;
+        }
+
+        .ui-menu .ui-menuitem-link {
+            padding: 10px 14px !important;
+            color: var(--text-secondary) !important;
+            border-radius: var(--radius-md) !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all 0.2s ease !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+        }
+
+        .ui-menu .ui-menuitem-link:hover {
+            background-color: var(--primary-light) !important;
+            color: var(--primary) !important;
+        }
+
+        .ui-menu .ui-menuitem-icon {
+            color: var(--text-secondary) !important;
+            margin-right: 12px !important;
+            font-size: 1.1rem !important;
+            transition: color 0.2s ease !important;
+        }
+
+        .ui-menu .ui-menuitem-link:hover .ui-menuitem-icon {
+            color: var(--primary) !important;
+        }
+        
+        /* DISEÑO DE BOTONES DE ACCIÓN GLOBALES */
+        .ui-button {
+            border-radius: var(--radius-md) !important;
+            font-family: var(--font-family) !important;
+            font-weight: 600 !important;
+            transition: background-color 0.2s, transform 0.1s !important;
+        }
+        .ui-button:active {
+            transform: scale(0.98);
+        }
+
+        /* DISEÑO DE TARJETAS Y CONTENEDORES MÓDULOS */
+        .ui-card, .ui-datatable, .ui-toolbar {
+            border-radius: var(--radius-lg) !important;
+            border: 1px solid var(--border-color) !important;
+            background: var(--bg-surface) !important;
+            box-shadow: var(--shadow-sm) !important;
+            overflow: hidden;
+        }
+
+        .ui-toolbar {
+            padding: 16px 20px !important;
+            margin-bottom: 24px !important;
+        }
+
+        .ui-datatable th {
+            background: #f8fafc !important;
+            color: var(--text-secondary) !important;
+            font-weight: 600 !important;
+            padding: 14px 16px !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        
+        .ui-datatable td {
+            padding: 14px 16px !important;
+            border-color: #f1f5f9 !important;
+            color: var(--text-primary);
+        }
+
+        /* UNIFICACIÓN DE INPUTS Y FOCO ACCESIBLE */
+        .ui-inputfield {
+            border-radius: var(--radius-md) !important;
+            padding: 8px 12px !important;
+            border: 1px solid var(--border-color) !important;
+            font-family: var(--font-family) !important;
+            font-size: 0.95rem !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+        }
+
+        .ui-inputfield:focus, .ui-inputfield.ui-state-focus {
+            border-color: var(--primary) !important;
+            box-shadow: var(--focus-ring) !important;
+            outline: none !important;
+        }
+
+        /* MODALES RESPONSIVOS Y UNIFICADOS */
+        .ui-dialog {
+            border-radius: var(--radius-lg) !important;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
+            border: 1px solid var(--border-color) !important;
+            max-width: 95vw !important;
+        }
+
+        .ui-dialog .ui-dialog-titlebar {
+            background: #ffffff !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 16px 20px !important;
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
+        }
+
+        .ui-confirm-dialog {
+            max-width: 92vw !important;
+        }
+
+        /* BOTONES DE ACCIÓN EN TABLAS */
+        .rounded-button.ui-button-flat {
+            width: 2.2rem !important;
+            height: 2.2rem !important;
+            padding: 0 !important;
+            margin: 0 3px !important;
+        }
+
+        /* ESTILOS DE ESTADOS VACÍOS E INDICADOR DE CARGA */
+        .ui-datatable-empty-message td {
+            text-align: center !important;
+            padding: 36px 16px !important;
+            color: var(--text-muted) !important;
+            font-size: 0.95rem !important;
+            font-weight: 500;
+        }
+
+        .ajax-status-indicator {
+            position: fixed;
+            top: 18px;
+            right: 260px;
+            z-index: 9999;
+        }
+
+        .ajax-loading-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        /* RESPONSIVIDAD PARA TABLETS Y MÓVILES */
+        @media (max-width: 991px) {
+            .sidebar {
+                width: 220px;
+                padding: 16px 12px;
+            }
+            .content-wrapper {
+                padding: 24px;
+            }
+            .topbar {
+                padding: 0 20px;
+            }
+            .ajax-status-indicator {
+                right: 20px;
+                top: 75px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 12px 16px;
+                box-sizing: border-box;
+            }
+            .content-wrapper {
+                padding: 16px;
+            }
+            .topbar {
+                padding: 12px 16px;
+                height: auto;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .topbar h2 {
+                font-size: 1.15rem;
+            }
+            .user-panel {
+                gap: 10px;
+            }
+            .user-badge {
+                font-size: 0.78rem;
+                padding: 4px 10px;
+            }
+            .ui-toolbar {
+                padding: 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: stretch !important;
+            }
+            .formgrid.grid {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            .formgrid.grid > .field {
+                width: 100% !important;
+            }
+        }
+    </style>
+</h:head>
+<h:body>
+    <p:ajaxStatus styleClass="ajax-status-indicator">
+        <f:facet name="start">
+            <div class="ajax-loading-bar">
+                <i class="pi pi-spin pi-spinner" style="font-size: 1rem; color: var(--primary);"></i>
+                <span>Procesando...</span>
+            </div>
+        </f:facet>
+        <f:facet name="complete">
+            <h:outputText value="" />
+        </f:facet>
+    </p:ajaxStatus>
+    <div class="layout-wrapper">
+        <div class="topbar">
+            <h2><i class="pi pi-graduation-cap"></i> EduManager Pro</h2>
+            <div class="user-panel">
+                <div class="user-badge">
+                    <i class="pi pi-user" style="margin-right: 6px; font-size: 0.9rem;"></i>
+                    <h:outputText value="#{sessionScope.usuarioLogueado.username} • #{sessionScope.usuarioLogueado.rol.nombre}" />
+                </div>
+                <h:form>
+                    <p:commandButton action="#{loginBean.logout}" icon="pi pi-sign-out" title="Cerrar Sesión" 
+                                     styleClass="ui-button-danger ui-button-flat" style="color: var(--text-secondary); padding: 0; font-size: 1.2rem;"/>
+                </h:form>
+            </div>
+        </div>
+        
+        <div class="main-container">
+            <div class="sidebar">
+                <h:form id="menuForm">
+                    <p:menu>
+                        <p:submenu label="Principal" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}">
+                            <p:menuitem value="Dashboard" url="#{request.contextPath}/dashboard.xhtml" icon="pi pi-grid"/>
+                        </p:submenu>
+                        
+                        <p:submenu label="Administración" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}">
+                            <p:menuitem value="Usuarios" url="#{request.contextPath}/usuarios.xhtml" icon="pi pi-users"/>
+                            <p:menuitem value="Roles" url="#{request.contextPath}/roles.xhtml" icon="pi pi-lock"/>
+                        </p:submenu>
+                        
+                        <p:submenu label="Comunidad Escolar" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}">
+                            <p:menuitem value="Docentes" url="#{request.contextPath}/docentes.xhtml" icon="pi pi-building-columns"/>
+                            <p:menuitem value="Estudiantes" url="#{request.contextPath}/estudiantes.xhtml" icon="pi pi-id-card"/>
+                        </p:submenu>
+
+                        <p:submenu label="Portal Docente" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'DOCENTE'}">
+                            <p:menuitem value="Mi Perfil" url="#{request.contextPath}/perfil-docente.xhtml" icon="pi pi-user-edit"/>
+                            <p:menuitem value="Mis Cursos" url="#{request.contextPath}/mis-cursos.xhtml" icon="pi pi-bookmark"/>
+                        </p:submenu>
+                        
+                        <p:submenu label="Académico" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN' or sessionScope.usuarioLogueado.rol.nombre eq 'DOCENTE'}">
+                            <p:menuitem value="Cursos" url="#{request.contextPath}/cursos.xhtml" icon="pi pi-book" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}"/>
+                            <p:menuitem value="Matrículas" url="#{request.contextPath}/matriculas.xhtml" icon="pi pi-file-edit" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}"/>
+                            <p:menuitem value="Registro de Notas" url="#{request.contextPath}/notas.xhtml" icon="pi pi-chart-bar"/>
+                        </p:submenu>
+
+                        <p:submenu label="Finanzas" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN' or sessionScope.usuarioLogueado.rol.nombre eq 'DOCENTE'}">
+                            <p:menuitem value="Pagos y Tesorería" url="#{request.contextPath}/pagos.xhtml" icon="pi pi-credit-card"/>
+                        </p:submenu>
+
+                        <p:submenu label="Portal Estudiantil" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ESTUDIANTE'}">
+                            <p:menuitem value="Mi Perfil" url="#{request.contextPath}/mi-perfil.xhtml" icon="pi pi-user-edit"/>
+                            <p:menuitem value="Mis Notas" url="#{request.contextPath}/mis-notas.xhtml" icon="pi pi-check-circle"/>
+                            <p:menuitem value="Estado de Cuenta" url="#{request.contextPath}/mis-pagos.xhtml" icon="pi pi-wallet"/>
+                        </p:submenu>
+                    </p:menu>
+                </h:form>
+            </div>
+            
+            <div class="content-wrapper">
+                <ui:insert name="content">
+                    Contenido por defecto
+                </ui:insert>
+            </div>
+        </div>
+    </div>
+</h:body>
+</html>

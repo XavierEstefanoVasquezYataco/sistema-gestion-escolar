@@ -1,0 +1,275 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Dashboard - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <style>
+            .welcome-header { margin-bottom: 30px; }
+            .welcome-header h1 { margin: 0; color: var(--text-primary); font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+            .welcome-header p { color: var(--text-secondary); font-size: 1.05rem; margin-top: 5px; }
+
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 24px;
+                margin-bottom: 35px;
+            }
+
+            .metric-card {
+                border-radius: var(--radius-lg);
+                padding: 24px;
+                color: white;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border: none;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                min-height: 140px;
+            }
+
+            .metric-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+
+            .metric-card .icon-bg {
+                position: absolute;
+                right: -15px;
+                bottom: -25px;
+                font-size: 7rem;
+                opacity: 0.15;
+                transition: transform 0.3s ease;
+            }
+
+            .card-blue { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); }
+            .card-green { background: linear-gradient(135deg, #10b981 0%, #065f46 100%); }
+            .card-orange { background: linear-gradient(135deg, #f59e0b 0%, #92400e 100%); }
+            .card-red { background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%); }
+
+            .metric-title {
+                font-size: 0.85rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                opacity: 0.9;
+                margin: 0;
+            }
+
+            .metric-value {
+                font-size: 2.8rem;
+                font-weight: 800;
+                margin: 10px 0 0 0;
+                line-height: 1;
+            }
+
+            .charts-container {
+                display: flex;
+                gap: 24px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+
+            .chart-box {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
+                padding: 24px;
+                box-shadow: var(--shadow-sm);
+                flex: 1;
+                min-width: 450px;
+            }
+
+            .chart-box-pie {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
+                padding: 24px;
+                box-shadow: var(--shadow-sm);
+                width: 380px;
+                flex-shrink: 0;
+            }
+
+            .chart-title {
+                margin: 0 0 20px 0;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .banner-portal {
+                background: white;
+                padding: 40px;
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-sm);
+                display: flex;
+                align-items: center;
+                gap: 30px;
+                border-left: 6px solid;
+            }
+
+            .banner-docente { border-color: #4f46e5; }
+            .banner-estudiante { border-color: #10b981; }
+
+            .banner-icon {
+                background: var(--bg-main);
+                padding: 20px;
+                border-radius: 50%;
+                font-size: 3.5rem;
+            }
+
+            .banner-docente .banner-icon { color: #4f46e5; }
+            .banner-estudiante .banner-icon { color: #10b981; }
+
+            .banner-text h2 {
+                margin: 0 0 10px 0;
+                font-size: 1.8rem;
+                color: var(--text-primary);
+            }
+
+            .banner-text p {
+                margin: 0;
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                line-height: 1.5;
+            }
+
+            .filter-toolbar {
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            @media (max-width: 768px) {
+                .welcome-header h1 {
+                    font-size: 1.5rem !important;
+                }
+                .metric-value {
+                    font-size: 2.2rem !important;
+                }
+                .chart-box {
+                    min-width: 100% !important;
+                    padding: 16px !important;
+                }
+                .chart-box-pie {
+                    width: 100% !important;
+                    padding: 16px !important;
+                }
+                .banner-portal {
+                    flex-direction: column !important;
+                    padding: 24px !important;
+                    text-align: center !important;
+                    gap: 15px !important;
+                }
+            }
+        </style>
+
+        <h:form id="dashboardForm">
+            <div class="welcome-header">
+                <h1>Panel de Control</h1>
+                <p>Hola, <b>#{sessionScope.usuarioLogueado.username}</b>. Aquí tienes el resumen analítico de tu entorno.</p>
+            </div>
+
+            <h:panelGroup layout="block" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ADMIN'}">
+
+                <div class="filter-toolbar">
+                    <p:selectOneButton id="periodoFiltro"
+                                       value="#{dashboardBean.periodoFiltro}"
+                                       unselectable="false">
+                        <f:selectItem itemLabel="Semanal" itemValue="SEMANAL" />
+                        <f:selectItem itemLabel="Mensual" itemValue="MENSUAL" />
+                        <f:selectItem itemLabel="Anual" itemValue="ANUAL" />
+                        <p:ajax event="change"
+                                process="@this"
+                                update="dashboardForm"
+                                listener="#{dashboardBean.filtrarGraficos}" />
+                    </p:selectOneButton>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="metric-card card-blue">
+                        <h3 class="metric-title">Estudiantes Registrados</h3>
+                        <p class="metric-value">
+                            <h:outputText value="#{dashboardBean.totalEstudiantes}" />
+                        </p>
+                        <i class="pi pi-users icon-bg"></i>
+                    </div>
+
+                    <div class="metric-card card-green">
+                        <h3 class="metric-title">Docentes Activos</h3>
+                        <p class="metric-value">
+                            <h:outputText value="#{dashboardBean.totalDocentes}" />
+                        </p>
+                        <i class="pi pi-building-columns icon-bg"></i>
+                    </div>
+
+                    <div class="metric-card card-orange">
+                        <h3 class="metric-title">Cursos Impartidos</h3>
+                        <p class="metric-value">
+                            <h:outputText value="#{dashboardBean.totalCursos}" />
+                        </p>
+                        <i class="pi pi-bookmark icon-bg"></i>
+                    </div>
+
+                    <div class="metric-card card-red">
+                        <h3 class="metric-title">Pagos Pendientes</h3>
+                        <p class="metric-value">
+                            <h:outputText value="#{dashboardBean.pagosPendientes}" />
+                        </p>
+                        <i class="pi pi-credit-card icon-bg"></i>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-box">
+                        <h4 class="chart-title">
+                            <i class="pi pi-chart-bar" style="color: var(--primary);"></i>
+                            Balance de Ingresos por Periodo #{dashboardBean.periodoFiltro}
+                        </h4>
+                        <p:barChart model="#{dashboardBean.barModel}" style="width: 100%; height: 280px;" />
+                    </div>
+
+                    <div class="chart-box-pie">
+                        <h4 class="chart-title">
+                            <i class="pi pi-chart-pie" style="color: #10b981;"></i>
+                            Población Estudiantil
+                        </h4>
+                        <p:pieChart model="#{dashboardBean.pieModel}" style="width: 100%; height: 280px;" />
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'DOCENTE'}">
+                <div class="banner-portal banner-docente">
+                    <div class="banner-icon"><i class="pi pi-desktop"></i></div>
+                    <div class="banner-text">
+                        <h2>Portal Académico del Docente</h2>
+                        <p>Utiliza el menú lateral para acceder a tu carga académica, revisar las listas de tus estudiantes y gestionar el registro de calificaciones correspondientes al periodo actual.</p>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" rendered="#{sessionScope.usuarioLogueado.rol.nombre eq 'ESTUDIANTE'}">
+                <div class="banner-portal banner-estudiante">
+                    <div class="banner-icon"><i class="pi pi-id-card"></i></div>
+                    <div class="banner-text">
+                        <h2>Bienvenido a tu Portal Estudiantil</h2>
+                        <p>Desde aquí podrás consultar tu historial académico, descargar tus libretas de notas en PDF y monitorear el estado de cuenta financiero de tus mensualidades.</p>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

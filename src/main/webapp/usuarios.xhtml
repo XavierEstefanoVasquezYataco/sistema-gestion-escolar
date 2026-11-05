@@ -1,0 +1,107 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Usuarios - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo Usuario" icon="pi pi-plus" actionListener="#{usuarioBean.nuevoUsuario}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoUsuario').show()"
+                                     styleClass="ui-button-success" style="margin-right: .5rem" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-usuarios" widgetVar="dtUsuarios" var="usr" value="#{usuarioBean.usuarios}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{usr.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron usuarios registrados."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Gestión de Usuarios</div>
+                </f:facet>
+
+                <p:column headerText="ID" width="50">
+                    <h:outputText value="#{usr.id}" />
+                </p:column>
+
+                <p:column headerText="Username" sortBy="#{usr.username}" filterBy="#{usr.username}">
+                    <h:outputText value="#{usr.username}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Rol" sortBy="#{usr.rol.nombre}">
+                    <h:outputText value="#{usr.rol.nombre}" />
+                </p:column>
+
+                <p:column headerText="Estado">
+                    <p:tag styleClass="#{usr.activo ? 'ui-tag-success' : 'ui-tag-danger'}" 
+                           value="#{usr.activo ? 'ACTIVO' : 'INACTIVO'}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoUsuario').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{usr}" target="#{usuarioBean.usuarioSeleccionado}" />
+                        <f:setPropertyActionListener value="#{usr.rol.id}" target="#{usuarioBean.idRolSeleccionado}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarUsuarioDialog').show()">
+                        <f:setPropertyActionListener value="#{usr}" target="#{usuarioBean.usuarioSeleccionado}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle de Usuario" showEffect="fade" modal="true" widgetVar="dialogoUsuario" responsive="true" style="max-width: 480px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="usuario-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="username" value="Nombre de Usuario" />
+                        <p:inputText id="username" value="#{usuarioBean.usuarioSeleccionado.username}" required="true" requiredMessage="El usuario es obligatorio."/>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="password" value="Contraseña (Dejar vacío para no cambiar)" />
+                        <p:password id="password" value="#{usuarioBean.usuarioSeleccionado.password}" toggleMask="true" 
+                                    required="#{usuarioBean.usuarioSeleccionado.id == null}" requiredMessage="La contraseña es obligatoria."/>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="rol" value="Rol en el Sistema" />
+                        <p:selectOneMenu id="rol" value="#{usuarioBean.idRolSeleccionado}" required="true" requiredMessage="Debe seleccionar un rol.">
+                            <f:selectItem itemLabel="Seleccione un Rol" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{usuarioBean.roles}" var="r" itemLabel="#{r.nombre}" itemValue="#{r.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="activo" value="Estado de la Cuenta" style="display:block; margin-bottom: 5px;"/>
+                        <p:selectBooleanButton id="activo" value="#{usuarioBean.usuarioSeleccionado.activo}" onLabel="Activo" offLabel="Inactivo" onIcon="pi pi-check" offIcon="pi pi-times" style="width:10rem" />
+                    </div>
+                </p:outputPanel>
+                
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{usuarioBean.guardarUsuario}"
+                                     update="usuario-contenido :form:mensajes :form:dt-usuarios" process="usuario-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoUsuario').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarUsuarioDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar este usuario?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{usuarioBean.eliminarUsuario}"
+                                 process="@this" oncomplete="PF('eliminarUsuarioDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarUsuarioDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

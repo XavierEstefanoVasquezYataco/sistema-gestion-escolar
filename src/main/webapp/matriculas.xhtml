@@ -1,0 +1,144 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Matrículas - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Nueva Matrícula" icon="pi pi-plus" actionListener="#{matriculaBean.nuevaMatricula}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoMatricula').show()"
+                                     styleClass="ui-button-success" style="margin-right: .5rem" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-matriculas" widgetVar="dtMatriculas" var="mat" value="#{matriculaBean.matriculas}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{mat.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron matrículas registradas."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Gestión de Matrículas</div>
+                </f:facet>
+
+                <p:column headerText="ID" width="50" sortBy="#{mat.id}">
+                    <h:outputText value="#{mat.id}" />
+                </p:column>
+
+                <p:column headerText="Estudiante" sortBy="#{mat.estudiante.apellidos}" filterBy="#{mat.estudiante.apellidos}">
+                    <h:outputText value="#{mat.estudiante.apellidos}, #{mat.estudiante.nombres}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Periodo" width="100" sortBy="#{mat.periodo.nombre}" filterBy="#{mat.periodo.nombre}">
+                    <h:outputText value="#{mat.periodo.nombre}" />
+                </p:column>
+
+                <p:column headerText="Grado y Sección">
+                    <h:outputText value="#{mat.grado.nombre} - #{mat.seccion.nombre}" />
+                </p:column>
+
+                <p:column headerText="Fecha" width="120">
+                    <h:outputText value="#{mat.fechaMatricula}" />
+                </p:column>
+
+                <p:column headerText="Estado" width="100">
+                    <p:tag styleClass="#{mat.estado == 'ACTIVA' ? 'ui-tag-success' : 'ui-tag-warning'}" value="#{mat.estado}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoMatricula').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{mat}" target="#{matriculaBean.matriculaSeleccionada}" />
+                        <f:setPropertyActionListener value="#{mat.estudiante.id}" target="#{matriculaBean.idEstudiante}" />
+                        <f:setPropertyActionListener value="#{mat.periodo.id}" target="#{matriculaBean.idPeriodo}" />
+                        <f:setPropertyActionListener value="#{mat.grado.id}" target="#{matriculaBean.idGrado}" />
+                        <f:setPropertyActionListener value="#{mat.seccion.id}" target="#{matriculaBean.idSeccion}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarMatriculaDialog').show()">
+                        <f:setPropertyActionListener value="#{mat}" target="#{matriculaBean.matriculaSeleccionada}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle de Matrícula" showEffect="fade" modal="true" widgetVar="dialogoMatricula" responsive="true" style="max-width: 550px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="matricula-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="estudiante" value="Estudiante" />
+                        <p:selectOneMenu id="estudiante" value="#{matriculaBean.idEstudiante}" required="true" requiredMessage="Seleccione un estudiante." filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="Seleccione Estudiante" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{matriculaBean.estudiantes}" var="e" itemLabel="#{e.apellidos}, #{e.nombres}" itemValue="#{e.id}" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="periodo" value="Periodo" />
+                            <p:selectOneMenu id="periodo" value="#{matriculaBean.idPeriodo}" required="true">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{matriculaBean.periodos}" var="p" itemLabel="#{p.nombre}" itemValue="#{p.id}" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="fecha" value="Fecha" />
+                            <p:datePicker id="fecha" value="#{matriculaBean.matriculaSeleccionada.fechaMatricula}" pattern="yyyy-MM-dd" required="true"/>
+                        </div>
+                    </div>
+
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="grado" value="Grado" />
+                            <p:selectOneMenu id="grado" value="#{matriculaBean.idGrado}" required="true">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{matriculaBean.grados}" var="g" itemLabel="#{g.nombre} - #{g.nivel}" itemValue="#{g.id}" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="seccion" value="Sección" />
+                            <p:selectOneMenu id="seccion" value="#{matriculaBean.idSeccion}" required="true">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{matriculaBean.secciones}" var="s" itemLabel="#{s.nombre}" itemValue="#{s.id}" />
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+                    
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="estado" value="Estado" />
+                        <p:selectOneMenu id="estado" value="#{matriculaBean.matriculaSeleccionada.estado}" required="true">
+                            <f:selectItem itemLabel="ACTIVA" itemValue="ACTIVA" />
+                            <f:selectItem itemLabel="INACTIVA" itemValue="INACTIVA" />
+                            <f:selectItem itemLabel="RETIRADO" itemValue="RETIRADO" />
+                        </p:selectOneMenu>
+                    </div>
+                </p:outputPanel>
+                
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{matriculaBean.guardarMatricula}"
+                                     update="matricula-contenido :form:mensajes :form:dt-matriculas" process="matricula-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoMatricula').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarMatriculaDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar esta matrícula?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{matriculaBean.eliminarMatricula}"
+                                 process="@this" oncomplete="PF('eliminarMatriculaDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarMatriculaDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

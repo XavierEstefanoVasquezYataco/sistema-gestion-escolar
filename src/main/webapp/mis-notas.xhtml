@@ -1,0 +1,47 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Mis Calificaciones - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form>
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <h2 style="margin:0; font-size:1.5rem; color:#1e293b;">Historial Académico</h2>
+                </p:toolbarGroup>
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="Descargar Reporte" icon="pi pi-file-pdf" ajax="false" styleClass="ui-button-danger">
+                        <p:dataExporter type="pdf" target="dt-mis-notas" fileName="Mis_Calificaciones_#{portalEstudianteBean.miEstudiante.dni}"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-mis-notas" value="#{portalEstudianteBean.misNotas}" var="nota"
+                         emptyMessage="No tienes calificaciones registradas."
+                         reflow="true" paginator="true" rows="10" paginatorPosition="bottom" style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <p:column headerText="Periodo" sortBy="#{nota.matricula.periodo.nombre}" groupRow="true">
+                    <h:outputText value="#{nota.matricula.periodo.nombre}" style="font-weight: bold;" />
+                </p:column>
+
+                <p:column headerText="Curso" sortBy="#{nota.curso.nombre}">
+                    <h:outputText value="#{nota.curso.nombre}" />
+                </p:column>
+
+                <p:column headerText="Unidad" style="text-align: center;">
+                    <h:outputText value="Unidad #{nota.unidad}" />
+                </p:column>
+
+                <p:column headerText="Calificación" style="text-align: center; font-weight: bold;">
+                    <h:outputText value="#{nota.calificacion}">
+                        <f:convertNumber pattern="#0.00" />
+                    </h:outputText>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>

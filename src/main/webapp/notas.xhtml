@@ -1,0 +1,126 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Registro de Notas - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Registrar Nota" icon="pi pi-plus" actionListener="#{notaBean.nuevaNota}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoNota').show()"
+                                     styleClass="ui-button-success" style="margin-right: 1rem" />
+                </p:toolbarGroup>
+                
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="Exportar PDF" icon="pi pi-file-pdf" ajax="false" styleClass="ui-button-danger ui-button-outlined" style="margin-right: .5rem">
+                        <p:dataExporter type="pdf" target="dt-notas" fileName="Reporte_Calificaciones"/>
+                    </p:commandButton>
+                    <p:commandButton value="Exportar Excel" icon="pi pi-file-excel" ajax="false" styleClass="ui-button-success ui-button-outlined">
+                        <p:dataExporter type="xlsx" target="dt-notas" fileName="Reporte_Calificaciones"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-notas" widgetVar="dtNotas" var="nota" value="#{notaBean.notas}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{nota.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron calificaciones registradas."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Registro de Calificaciones</div>
+                </f:facet>
+
+                <p:column headerText="Estudiante" sortBy="#{nota.matricula.estudiante.apellidos}" filterBy="#{nota.matricula.estudiante.apellidos}">
+                    <h:outputText value="#{nota.matricula.estudiante.apellidos}, #{nota.matricula.estudiante.nombres}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Curso" sortBy="#{nota.curso.nombre}" filterBy="#{nota.curso.nombre}">
+                    <h:outputText value="#{nota.curso.nombre}" />
+                </p:column>
+
+                <p:column headerText="Unidad" width="100" style="text-align: center;" sortBy="#{nota.unidad}">
+                    <h:outputText value="Unidad #{nota.unidad}" />
+                </p:column>
+
+                <p:column headerText="Calificación" width="120" style="text-align: center;" sortBy="#{nota.calificacion}">
+                    <h:outputText value="#{nota.calificacion}">
+                        <f:convertNumber pattern="#0.00" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoNota').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{nota}" target="#{notaBean.notaSeleccionada}" />
+                        <f:setPropertyActionListener value="#{nota.matricula.id}" target="#{notaBean.idMatricula}" />
+                        <f:setPropertyActionListener value="#{nota.curso.id}" target="#{notaBean.idCurso}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarNotaDialog').show()">
+                        <f:setPropertyActionListener value="#{nota}" target="#{notaBean.notaSeleccionada}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle de Calificación" showEffect="fade" modal="true" widgetVar="dialogoNota" responsive="true" style="max-width: 500px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="nota-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="matricula" value="Estudiante Matriculado" />
+                        <p:selectOneMenu id="matricula" value="#{notaBean.idMatricula}" required="true" requiredMessage="Seleccione la matrícula." filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="Buscar Estudiante..." itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{notaBean.matriculas}" var="m" itemLabel="#{m.estudiante.apellidos}, #{m.estudiante.nombres} (#{m.grado.nombre})" itemValue="#{m.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="curso" value="Curso" />
+                        <p:selectOneMenu id="curso" value="#{notaBean.idCurso}" required="true" requiredMessage="Seleccione el curso." filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="Seleccione Curso..." itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{notaBean.cursos}" var="c" itemLabel="#{c.nombre} (#{c.grado.nombre})" itemValue="#{c.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="unidad" value="Unidad Académica" />
+                            <p:selectOneMenu id="unidad" value="#{notaBean.notaSeleccionada.unidad}" required="true">
+                                <f:selectItem itemLabel="Unidad 1" itemValue="1" />
+                                <f:selectItem itemLabel="Unidad 2" itemValue="2" />
+                                <f:selectItem itemLabel="Unidad 3" itemValue="3" />
+                                <f:selectItem itemLabel="Unidad 4" itemValue="4" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="calificacion" value="Nota (0 - 20)" />
+                            <p:inputNumber id="calificacion" value="#{notaBean.notaSeleccionada.calificacion}" minValue="0.00" maxValue="20.00" decimalPlaces="2" required="true" />
+                        </div>
+                    </div>
+                </p:outputPanel>
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{notaBean.guardarNota}"
+                                     update="nota-contenido :form:mensajes :form:dt-notas" process="nota-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoNota').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarNotaDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar esta calificación?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{notaBean.eliminarNota}"
+                                 process="@this" oncomplete="PF('eliminarNotaDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarNotaDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

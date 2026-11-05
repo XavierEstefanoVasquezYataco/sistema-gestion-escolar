@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Mis Cursos - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <div style="margin-bottom: 25px;">
+            <h1 style="margin: 0; color: #1e293b; font-size: 1.8rem;">Carga Académica</h1>
+            <p style="color: #64748b; margin-top: 5px;">Docente: #{portalDocenteBean.docActual.apellidos}, #{portalDocenteBean.docActual.nombres} | Especialidad: #{portalDocenteBean.docActual.especialidad}</p>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+            <ui:repeat value="#{portalDocenteBean.misCursosAsignados}" var="cc">
+                <p:card style="flex: 1 1 280px; max-width: 340px; border-top: 4px solid var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <f:facet name="title">
+                        <i class="pi pi-book" style="color:var(--primary); margin-right:8px;"></i>#{cc.class.simpleName ne 'DocenteCurso' ? 'Curso' : cc.curso.nombre}
+                    </f:facet>
+                    <p style="margin: 5px 0; color:#475569;"><b>Grado:</b> #{cc.curso.grado.nombre} - #{cc.curso.grado.nivel}</p>
+                    <p style="margin: 5px 0; color:#475569;"><b>Sección:</b> Clase #{cc.seccion.nombre}</p>
+                    <p style="margin: 5px 0; color:var(--text-muted); font-size:0.9rem;">Periodo: #{cc.periodo.nombre}</p>
+                </p:card>
+            </ui:repeat>
+        </div>
+
+        <p:dataTable id="dt-mis-alumnos" value="#{portalDocenteBean.alumnosDeMisCursos}" var="al"
+                     emptyMessage="No hay alumnos inscritos en sus secciones asignadas."
+                     reflow="true" paginator="true" rows="10" paginatorPosition="bottom" style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            
+            <f:facet name="header">
+                <div style="font-weight: bold; font-size: 1.1rem; padding: 5px 0;">Listado de Alumnos por Sección (Modo Lectura)</div>
+            </f:facet>
+
+            <p:column headerText="Grado" sortBy="#{al.grado.nombre}" groupRow="true">
+                <h:outputText value="#{al.grado.nombre}" style="font-weight:bold;"/>
+            </p:column>
+
+            <p:column headerText="Sección" width="100" style="text-align:center;" sortBy="#{al.seccion.nombre}">
+                <h:outputText value="#{al.seccion.nombre}"/>
+            </p:column>
+
+            <p:column headerText="DNI" width="120">
+                <h:outputText value="#{al.estudiante.dni}"/>
+            </p:column>
+
+            <p:column headerText="Apellidos y Nombres" sortBy="#{al.estudiante.apellidos}">
+                <h:outputText value="#{al.estudiante.apellidos}, #{al.estudiante.nombres}"/>
+            </p:column>
+
+            <p:column headerText="Apoderado">
+                <h:outputText value="#{al.estudiante.apoderadoNombre}"/>
+            </p:column>
+        </p:dataTable>
+    </ui:define>
+</ui:composition>

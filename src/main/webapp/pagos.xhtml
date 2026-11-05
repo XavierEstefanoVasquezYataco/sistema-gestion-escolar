@@ -1,0 +1,135 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Pagos y Tesorería - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Registrar Nuevo Pago" icon="pi pi-plus" actionListener="#{pagoBean.nuevoPago}"
+                                     update=":dialogoForm" oncomplete="PF('dialogoPago').show()"
+                                     styleClass="ui-button-success" style="margin-right: 1rem" />
+                </p:toolbarGroup>
+                
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="Exportar PDF" icon="pi pi-file-pdf" ajax="false" styleClass="ui-button-danger ui-button-outlined" style="margin-right: .5rem">
+                        <p:dataExporter type="pdf" target="dt-pagos" fileName="Reporte_Tesoreria_Pagos"/>
+                    </p:commandButton>
+                    <p:commandButton value="Exportar Excel" icon="pi pi-file-excel" ajax="false" styleClass="ui-button-success ui-button-outlined">
+                        <p:dataExporter type="xlsx" target="dt-pagos" fileName="Reporte_Tesoreria_Pagos"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-pagos" widgetVar="dtPagos" var="pago" value="#{pagoBean.pagos}"
+                         reflow="true" paginator="true" rows="10" rowKey="#{pago.id}"
+                         paginatorPosition="bottom" emptyMessage="No se encontraron registros de pago en tesorería."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Control de Tesorería</div>
+                </f:facet>
+
+                <p:column headerText="Estudiante" sortBy="#{pago.matricula.estudiante.apellidos}" filterBy="#{pago.matricula.estudiante.apellidos}">
+                    <h:outputText value="#{pago.matricula.estudiante.apellidos}, #{pago.matricula.estudiante.nombres}" style="font-weight: bold;"/>
+                </p:column>
+
+                <p:column headerText="Concepto" sortBy="#{pago.tipoPago.nombre}" filterBy="#{pago.tipoPago.nombre}">
+                    <h:outputText value="#{pago.tipoPago.nombre}" />
+                </p:column>
+
+                <p:column headerText="Monto (S/)" width="120" style="text-align: right;" sortBy="#{pago.monto}">
+                    <h:outputText value="#{pago.monto}">
+                        <f:convertNumber pattern="S/ #,##0.00" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Operación" width="150" filterBy="#{pago.numeroOperacion}">
+                    <h:outputText value="#{pago.numeroOperacion}" />
+                </p:column>
+
+                <p:column headerText="Estado" width="120" style="text-align: center;">
+                    <p:tag styleClass="#{pago.estado == 'PAGADO' ? 'ui-tag-success' : (pago.estado == 'PENDIENTE' ? 'ui-tag-warning' : 'ui-tag-danger')}" 
+                           value="#{pago.estado}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogoForm"
+                                     oncomplete="PF('dialogoPago').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat" process="@this">
+                        <f:setPropertyActionListener value="#{pago}" target="#{pagoBean.pagoSeleccionado}" />
+                        <f:setPropertyActionListener value="#{pago.matricula.id}" target="#{pagoBean.idMatricula}" />
+                        <f:setPropertyActionListener value="#{pago.tipoPago.id}" target="#{pagoBean.idTipoPago}" />
+                    </p:commandButton>
+                    <p:commandButton class="ui-button-danger rounded-button ui-button-flat" icon="pi pi-trash"
+                                     process="@this" oncomplete="PF('eliminarPagoDialog').show()">
+                        <f:setPropertyActionListener value="#{pago}" target="#{pagoBean.pagoSeleccionado}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle de Pago" showEffect="fade" modal="true" widgetVar="dialogoPago" responsive="true" style="max-width: 550px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="pago-contenido" class="ui-fluid">
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="matricula" value="Estudiante" />
+                        <p:selectOneMenu id="matricula" value="#{pagoBean.idMatricula}" required="true" requiredMessage="Seleccione el estudiante." filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="Buscar Estudiante..." itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{pagoBean.matriculas}" var="m" itemLabel="#{m.estudiante.apellidos}, #{m.estudiante.nombres} (#{m.grado.nombre})" itemValue="#{m.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="tipoPago" value="Concepto de Pago" />
+                        <p:selectOneMenu id="tipoPago" value="#{pagoBean.idTipoPago}" required="true" requiredMessage="Seleccione el concepto.">
+                            <f:selectItem itemLabel="Seleccione Concepto..." itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{pagoBean.tiposPago}" var="tp" itemLabel="#{tp.nombre}" itemValue="#{tp.id}" />
+                            <p:ajax listener="#{pagoBean.actualizarMonto}" update="monto" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="monto" value="Monto" />
+                            <p:inputNumber id="monto" value="#{pagoBean.pagoSeleccionado.monto}" symbol="S/ " decimalPlaces="2" required="true" />
+                        </div>
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="operacion" value="N° Operación (Opcional)" />
+                            <p:inputText id="operacion" value="#{pagoBean.pagoSeleccionado.numeroOperacion}" />
+                        </div>
+                    </div>
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="estado" value="Estado del Pago" />
+                        <p:selectOneMenu id="estado" value="#{pagoBean.pagoSeleccionado.estado}" required="true">
+                            <f:selectItem itemLabel="PENDIENTE" itemValue="PENDIENTE" />
+                            <f:selectItem itemLabel="PAGADO" itemValue="PAGADO" />
+                            <f:selectItem itemLabel="VENCIDO" itemValue="VENCIDO" />
+                        </p:selectOneMenu>
+                    </div>
+                </p:outputPanel>
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar" icon="pi pi-save" actionListener="#{pagoBean.guardarPago}"
+                                     update="pago-contenido :form:mensajes :form:dt-pagos" process="pago-contenido @this" styleClass="ui-button-primary" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dialogoPago').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat" type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarPagoDialog" showEffect="fade" style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar este registro?" header="Confirmar Eliminación" severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar" icon="pi pi-check" actionListener="#{pagoBean.eliminarPago}"
+                                 process="@this" oncomplete="PF('eliminarPagoDialog').hide()" styleClass="ui-button-danger" />
+                <p:commandButton value="Cancelar" type="button" styleClass="ui-button-secondary ui-button-flat" icon="pi pi-times"
+                                 onclick="PF('eliminarPagoDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Estado de Cuenta - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form>
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <h2 style="margin:0; font-size:1.5rem; color:#1e293b;">Estado de Cuenta Financiero</h2>
+                </p:toolbarGroup>
+                <p:toolbarGroup align="right">
+                    <p:commandButton value="Descargar Historial" icon="pi pi-file-pdf" ajax="false" styleClass="ui-button-danger">
+                        <p:dataExporter type="pdf" target="dt-mis-pagos" fileName="Estado_Cuenta_#{portalEstudianteBean.miEstudiante.dni}"/>
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-mis-pagos" value="#{portalEstudianteBean.misPagos}" var="pago"
+                         emptyMessage="No tienes registros de pago."
+                         reflow="true" paginator="true" rows="10" paginatorPosition="bottom" style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <p:column headerText="Concepto" sortBy="#{pago.tipoPago.nombre}">
+                    <h:outputText value="#{pago.tipoPago.nombre}" />
+                </p:column>
+
+                <p:column headerText="Monto" style="text-align: right;" sortBy="#{pago.monto}">
+                    <h:outputText value="#{pago.monto}">
+                        <f:convertNumber pattern="S/ #,##0.00" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Fecha de Pago">
+                    <h:outputText value="#{pago.fechaPago eq null ? '-' : pago.fechaPago}" />
+                </p:column>
+
+                <p:column headerText="N° Operación">
+                    <h:outputText value="#{pago.numeroOperacion eq null ? '-' : pago.numeroOperacion}" />
+                </p:column>
+
+                <p:column headerText="Estado" style="text-align: center;">
+                    <p:tag styleClass="#{pago.estado == 'PAGADO' ? 'ui-tag-success' : (pago.estado == 'PENDIENTE' ? 'ui-tag-warning' : 'ui-tag-danger')}" 
+                           value="#{pago.estado}" />
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>

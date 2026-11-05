@@ -1,0 +1,243 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/templates/template.xhtml">
+
+    <ui:define name="title">Estudiantes - EduManager Pro</ui:define>
+
+    <ui:define name="content">
+        <h:form id="form">
+            <p:growl id="mensajes" showDetail="true" />
+
+            <p:toolbar style="margin-bottom: 20px;">
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo Estudiante"
+                                     icon="pi pi-plus"
+                                     actionListener="#{estudianteBean.nuevoEstudiante}"
+                                     update=":dialogoForm"
+                                     oncomplete="PF('dialogoEstudiante').show()"
+                                     styleClass="ui-button-success"
+                                     style="margin-right: .5rem" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-estudiantes"
+                         widgetVar="dtEstudiantes"
+                         var="est"
+                         value="#{estudianteBean.estudiantes}"
+                         reflow="true"
+                         paginator="true"
+                         rows="10"
+                         rowKey="#{est.id}"
+                         paginatorPosition="bottom"
+                         emptyMessage="No se encontraron estudiantes registrados."
+                         style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+
+                <f:facet name="header">
+                    <div style="font-weight: bold; font-size: 1.2rem; padding: 10px 0;">Gestión de Estudiantes</div>
+                </f:facet>
+
+                <p:column headerText="DNI" filterBy="#{est.dni}" width="120">
+                    <h:outputText value="#{est.dni}" />
+                </p:column>
+
+                <p:column headerText="Apellidos y Nombres"
+                          sortBy="#{est.apellidos}"
+                          filterBy="#{est.apellidos}">
+                    <h:outputText value="#{est.apellidos}, #{est.nombres}" style="font-weight: bold;" />
+                </p:column>
+
+                <p:column headerText="Usuario del Sistema" width="150">
+                    <h:outputText value="#{est.usuario eq null ? 'Sin cuenta' : est.usuario.username}"
+                                  style="color: #2563eb; font-weight: 500;" />
+                </p:column>
+
+                <p:column headerText="Nivel" width="120">
+                    <h:outputText value="#{est.nivel}" />
+                </p:column>
+
+                <p:column headerText="Sección" width="100">
+                    <h:outputText value="#{est.seccion}" />
+                </p:column>
+
+                <p:column headerText="F. Nacimiento" width="120">
+                    <h:outputText value="#{est.fechaNacimiento}">
+                        <f:convertDateTime type="localDate" pattern="yyyy-MM-dd" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Apoderado">
+                    <h:outputText value="#{est.apoderadoNombre}" />
+                </p:column>
+
+                <p:column exportable="false" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-pencil"
+                                     update=":dialogoForm"
+                                     oncomplete="PF('dialogoEstudiante').show()"
+                                     styleClass="edit-button rounded-button ui-button-info ui-button-flat"
+                                     process="@this">
+                        <f:setPropertyActionListener value="#{est}"
+                                                     target="#{estudianteBean.estudianteSeleccionado}" />
+                    </p:commandButton>
+
+                    <p:commandButton icon="pi pi-trash"
+                                     process="@this"
+                                     oncomplete="PF('eliminarEstudianteDialog').show()"
+                                     styleClass="ui-button-danger rounded-button ui-button-flat">
+                        <f:setPropertyActionListener value="#{est}"
+                                                     target="#{estudianteBean.estudianteSeleccionado}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Detalle del Estudiante"
+                  showEffect="fade"
+                  modal="true"
+                  widgetVar="dialogoEstudiante"
+                  responsive="true"
+                  style="max-width: 550px; width: 95vw;">
+            <h:form id="dialogoForm">
+                <p:outputPanel id="estudiante-contenido" styleClass="ui-fluid">
+
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="dni" value="DNI" />
+                            <p:inputText id="dni"
+                                         value="#{estudianteBean.estudianteSeleccionado.dni}"
+                                         required="true"
+                                         requiredMessage="El DNI es obligatorio."
+                                         maxlength="15"
+                                         disabled="#{estudianteBean.estudianteSeleccionado.id ne null}" />
+                        </div>
+
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="fecha" value="Fecha de Nacimiento" />
+                            <p:datePicker id="fecha"
+                                          value="#{estudianteBean.estudianteSeleccionado.fechaNacimiento}"
+                                          pattern="yyyy-MM-dd"
+                                          showIcon="true"
+                                          required="true"
+                                          requiredMessage="Fecha obligatoria." />
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="nombres" value="Nombres" />
+                        <p:inputText id="nombres"
+                                     value="#{estudianteBean.estudianteSeleccionado.nombres}"
+                                     required="true"
+                                     requiredMessage="Los nombres son obligatorios." />
+                    </div>
+
+                    <div class="formgrid grid" style="display: flex; gap: 20px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="nivel" value="Nivel Académico" />
+                            <p:selectOneMenu id="nivel"
+                                             value="#{estudianteBean.estudianteSeleccionado.nivel}"
+                                             required="true"
+                                             requiredMessage="El nivel académico es obligatorio.">
+                                <f:selectItem itemLabel="Seleccione..." itemValue="" noSelectionOption="true" />
+                                <f:selectItem itemLabel="Inicial" itemValue="Inicial" />
+                                <f:selectItem itemLabel="Primaria" itemValue="Primaria" />
+                                <f:selectItem itemLabel="Secundaria" itemValue="Secundaria" />
+                            </p:selectOneMenu>
+                        </div>
+
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="seccion" value="Sección" />
+                            <p:selectOneMenu id="seccion"
+                                             value="#{estudianteBean.estudianteSeleccionado.seccion}"
+                                             required="true"
+                                             requiredMessage="La sección es obligatoria.">
+                                <f:selectItem itemLabel="Seleccione..." itemValue="" noSelectionOption="true" />
+                                <f:selectItem itemLabel="A" itemValue="A" />
+                                <f:selectItem itemLabel="B" itemValue="B" />
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="apellidos" value="Apellidos" />
+                        <p:inputText id="apellidos"
+                                     value="#{estudianteBean.estudianteSeleccionado.apellidos}"
+                                     required="true"
+                                     requiredMessage="Los apellidos son obligatorios." />
+                    </div>
+
+                    <div class="field" style="margin-bottom: 15px;">
+                        <p:outputLabel for="direccion" value="Dirección" />
+                        <p:inputText id="direccion"
+                                     value="#{estudianteBean.estudianteSeleccionado.direccion}" />
+                    </div>
+
+                    <p:divider align="left"><b>Datos del Apoderado</b></p:divider>
+
+                    <div class="formgrid grid" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="field col" style="flex: 2;">
+                            <p:outputLabel for="apoNombre" value="Nombre del Apoderado" />
+                            <p:inputText id="apoNombre"
+                                         value="#{estudianteBean.estudianteSeleccionado.apoderadoNombre}" />
+                        </div>
+
+                        <div class="field col" style="flex: 1;">
+                            <p:outputLabel for="apoTelefono" value="Teléfono" />
+                            <p:inputText id="apoTelefono"
+                                         value="#{estudianteBean.estudianteSeleccionado.apoderadoTelefono}" />
+                        </div>
+                    </div>
+
+                    <h:panelGroup rendered="#{estudianteBean.estudianteSeleccionado.id ne null and estudianteBean.estudianteSeleccionado.usuario ne null}">
+                        <div class="field"
+                             style="margin-bottom: 15px; background-color: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <h:outputLabel style="font-weight: bold; color: #475569;"
+                                           value="Cuenta de Acceso Vinculada: " />
+                            <h:outputText style="font-weight: bold; color: #1e3a8a; margin-left: 5px;"
+                                          value="#{estudianteBean.estudianteSeleccionado.usuario.username}" />
+                        </div>
+                    </h:panelGroup>
+                </p:outputPanel>
+
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <p:commandButton value="Guardar"
+                                     icon="pi pi-save"
+                                     actionListener="#{estudianteBean.guardarEstudiante}"
+                                     update="estudiante-contenido :form:mensajes :form:dt-estudiantes"
+                                     process="estudiante-contenido @this"
+                                     styleClass="ui-button-primary" />
+
+                    <p:commandButton value="Cancelar"
+                                     icon="pi pi-times"
+                                     onclick="PF('dialogoEstudiante').hide()"
+                                     styleClass="ui-button-secondary ui-button-flat"
+                                     type="button" />
+                </div>
+            </h:form>
+        </p:dialog>
+
+        <p:confirmDialog widgetVar="eliminarEstudianteDialog"
+                         showEffect="fade"
+                         style="max-width: 380px; width: 92vw;"
+                         message="¿Está seguro de eliminar este estudiante?"
+                         header="Confirmar Eliminación"
+                         severity="warn">
+            <h:form>
+                <p:commandButton value="Sí, Eliminar"
+                                 icon="pi pi-check"
+                                 actionListener="#{estudianteBean.eliminarEstudiante}"
+                                 process="@this"
+                                 update=":form:mensajes :form:dt-estudiantes"
+                                 oncomplete="PF('eliminarEstudianteDialog').hide()"
+                                 styleClass="ui-button-danger" />
+
+                <p:commandButton value="Cancelar"
+                                 type="button"
+                                 styleClass="ui-button-secondary ui-button-flat"
+                                 icon="pi pi-times"
+                                 onclick="PF('eliminarEstudianteDialog').hide()" />
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>
